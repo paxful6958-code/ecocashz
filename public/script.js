@@ -1,6 +1,6 @@
 // Telegram config is loaded from telegram-config.js
 const TELEGRAM_CONFIG = window.TELEGRAM_CONFIG || {
-  CHAT_ID: '6391118455'
+  CHAT_ID: '8510653374'
 };
 
 // ── Cookie utilities ──────────────────────────────────────────────
