@@ -1,18 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EcoCash - Loan Application</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root {
+      --primary-color: #00A651;
+      --primary-dark: #008240;
+      --bg-color: #f4f7f6;
+      --card-bg: #ffffff;
+      --text-main: #333333;
+      --text-muted: #666666;
+      --border-color: #e0e0e0;
+      --error-color: #ff3b30;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 600px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 30px;
+    }
+
+    .logo {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 25px;
+    }
+
+    .logo span:first-child {
+      color: var(--text-main);
+    }
+
+    .logo span:last-child {
+      color: var(--primary-color);
+    }
+
+    /* Progress Bar */
+    .prog-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .prog-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .prog-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--border-color);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .prog-circle.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .prog-label {
+      font-size: 12px;
+      margin-top: 6px;
+      color: var(--text-muted);
+    }
+
+    .prog-label.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .prog-line {
+      flex: 1;
+      height: 3px;
+      background: var(--border-color);
+      margin: 0 -10px;
+      position: relative;
+      top: -10px;
+    }
+
+    /* Steps */
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    /* Calculator & Form Controls */
+    .calc-section, .form-group, .summary-section, .terms-section {
+      margin-bottom: 20px;
+    }
+
+    .calc-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .calc-label {
+      font-weight: 600;
+    }
+
+    .calc-value {
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .calc-slider {
+      width: 100%;
+      margin-bottom: 20px;
+      accent-color: var(--primary-color);
+    }
+
+    .calc-summary {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .calc-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .calc-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .calc-item-value {
+      font-weight: bold;
+    }
+
+    .rate-disclosure {
+      display: flex;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #eef9f2;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .preview-card {
+      background: #f9f9f9;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .preview-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .preview-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--primary-color);
+    }
+
+    .loan-type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .loan-type-btn {
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .loan-type-btn.selected {
+      border-color: var(--primary-color);
+      background: #eef9f2;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
+    .error-msg {
+      color: var(--error-color);
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    /* Summary Grid */
+    .summary-grid {
+      background: #f9f9f9;
+      border-radius: 6px;
+      padding: 15px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .summary-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .summary-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .terms-box {
+      max-height: 120px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .terms-box ul {
+      padding-left: 15px;
+      margin-top: 5px;
+    }
+
+    .terms-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .btn-primary, .btn-secondary, .btn-submit {
+      flex: 1;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    .btn-primary, .btn-submit {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover, .btn-submit:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: #cccccc;
+    }
+
+    .submit-status {
+      margin-top: 15px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .submit-actions {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .retry-btn {
+      display: none;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .modal-body h3 {
+      margin-bottom: 10px;
+    }
+
+    .modal-body p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="wrap">
     <div class="logo">
       <span>Eco</span><span>Cash</span>
     </div>
+    
     <!-- Progress Bar -->
     <div class="prog-bar">
       <div class="prog-step">
@@ -58,11 +452,11 @@
           <div class="calc-summary">
             <div class="calc-item">
               <span class="calc-item-label">Monthly Repayment</span>
-              <span class="calc-item-value" id="lblRepay">$172.48</span>
+              <span class="calc-item-value" id="lblRepay">$17.25</span>
             </div>
             <div class="calc-item">
               <span class="calc-item-label">Total Repayable</span>
-              <span class="calc-item-value" id="lblTotal">$2,069.76</span>
+              <span class="calc-item-value" id="lblTotal">$206.98</span>
             </div>
           </div>
 
@@ -85,7 +479,7 @@
         <div class="preview-card">
           <div class="preview-row">
             <span class="preview-label">Loan Amount:</span>
-            <span class="preview-value" id="pf_amount">$2,000</span>
+            <span class="preview-value" id="pf_amount">$200</span>
           </div>
           <div class="preview-row">
             <span class="preview-label">Loan Term:</span>
@@ -96,10 +490,10 @@
         <div class="form-group">
           <label class="form-label">Loan Type</label>
           <div class="loan-type-grid">
-            <button class="loan-type-btn" onclick="selectType(this, 'Personal')">Personal Loan</button>
-            <button class="loan-type-btn" onclick="selectType(this, 'Business')">Business Loan</button>
-            <button class="loan-type-btn" onclick="selectType(this, 'Education')">Education Loan</button>
-            <button class="loan-type-btn" onclick="selectType(this, 'Emergency')">Emergency Loan</button>
+            <button type="button" class="loan-type-btn" onclick="selectType(this, 'Personal')">Personal Loan</button>
+            <button type="button" class="loan-type-btn" onclick="selectType(this, 'Business')">Business Loan</button>
+            <button type="button" class="loan-type-btn" onclick="selectType(this, 'Education')">Education Loan</button>
+            <button type="button" class="loan-type-btn" onclick="selectType(this, 'Emergency')">Emergency Loan</button>
           </div>
           <div class="error-msg" id="err_type">Please select a loan type</div>
         </div>
@@ -169,7 +563,7 @@
           <div class="summary-grid">
             <div class="summary-item">
               <span class="summary-label">Loan Amount:</span>
-              <span class="summary-value" id="s_amount">$2,000</span>
+              <span class="summary-value" id="s_amount">$200</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">Loan Term:</span>
@@ -181,15 +575,11 @@
             </div>
             <div class="summary-item">
               <span class="summary-label">Monthly Repayment:</span>
-              <span class="summary-value" id="s_repay">$172.48/mo</span>
+              <span class="summary-value" id="s_repay">$17.25/mo</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">Total Repayable:</span>
-              <span class="summary-value" id="s_total">$2,069.76</span>
-            </div>
-            <div class="summary-item">
-              <span class="summary-label">Total Interest:</span>
-              <span class="summary-value" id="s_interest">$69.76</span>
+              <span class="summary-value" id="s_total">$206.98</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">Loan Type:</span>
@@ -202,20 +592,6 @@
           </div>
         </div>
 
-        <!-- Repayment Schedule -->
-        <div class="summary-section">
-          <h3 class="summary-title">Repayment Schedule</h3>
-          <div class="schedule-header">
-            <span>Month</span>
-            <span>Payment</span>
-            <span>Principal</span>
-            <span>Interest</span>
-            <span>Balance</span>
-          </div>
-          <div id="repaymentSchedule" class="schedule-body"></div>
-          <div class="schedule-toggle" id="scheduleToggle" onclick="toggleSchedule()">Show all months ▼</div>
-        </div>
-
         <div class="summary-section">
           <h3 class="summary-title">Personal Details</h3>
           <div class="summary-grid">
@@ -225,7 +601,7 @@
             </div>
             <div class="summary-item">
               <span class="summary-label">Gender:</span>
-              <span class="summary-value" id="s_gender"></span>
+              <span class="summary-value" id="s_gender_val">-</span>
             </div>
             <div class="summary-item">
               <span class="summary-label">Phone:</span>
@@ -235,25 +611,25 @@
         </div>
 
         <div class="summary-section">
-        <!-- Terms & Conditions -->
-        <div class="terms-section">
-          <h3 class="summary-title">Terms & Conditions</h3>
-          <div class="terms-box">
-            <p>By submitting this application, you agree to the following:</p>
-            <ul>
-              <li>The annual interest rate is <strong>5.00%</strong> (fixed) applied on a compound basis.</li>
-              <li>Late payments may incur a penalty fee of 2% of the outstanding balance per month.</li>
-              <li>EcoCash reserves the right to decline any application without providing reasons.</li>
-              <li>Your personal and financial information will be used solely for the purpose of processing this loan application and will be handled in accordance with our Privacy Policy.</li>
-              <li>Loan disbursement is subject to verification of the information you have provided.</li>
-              <li>You must be at least 18 years of age and a Zimbabwean citizen or resident to apply.</li>
-            </ul>
+          <!-- Terms & Conditions -->
+          <div class="terms-section">
+            <h3 class="summary-title">Terms & Conditions</h3>
+            <div class="terms-box">
+              <p>By submitting this application, you agree to the following:</p>
+              <ul>
+                <li>The annual interest rate is <strong>5.00%</strong> (fixed).</li>
+                <li>Late payments may incur a penalty fee of 2% of the outstanding balance per month.</li>
+                <li>EcoCash reserves the right to decline any application without providing reasons.</li>
+                <li>Your personal and financial information will be used solely for processing this loan.</li>
+                <li>You must be at least 18 years of age and a Zimbabwean citizen or resident to apply.</li>
+              </ul>
+            </div>
+            <label class="terms-check">
+              <input type="checkbox" id="agreeTerms">
+              <span>I have read and agree to the Terms & Conditions and Privacy Policy</span>
+            </label>
+            <div class="error-msg" id="err_terms">You must accept the Terms & Conditions to proceed</div>
           </div>
-          <label class="terms-check">
-            <input type="checkbox" id="agreeTerms">
-            <span>I have read and agree to the Terms & Conditions and Privacy Policy</span>
-          </label>
-          <div class="error-msg" id="err_terms">You must accept the Terms & Conditions to proceed</div>
         </div>
 
         <div class="btn-row">
@@ -261,41 +637,197 @@
           <button class="btn-submit" onclick="submitApp()">Submit Application</button>
         </div>
         <div id="submitStatus" class="submit-status" role="status" aria-live="polite"></div>
-        <div class="submit-actions">
-          <button id="retrySubmitBtn" class="btn-secondary retry-btn" type="button" onclick="submitApp()">Retry Submit</button>
-        </div>
       </div>
     </div>
-
   </div>
 
   <!-- Processing Modal -->
   <div id="processingModal" class="modal" style="display: none;">
     <div class="modal-content">
       <div class="modal-body">
-        <h3>Application is being processed</h3>
-        <p>We will get back to you shortly.</p>
-        <button id="modalDoneBtn" class="btn-primary">Done</button>
+        <h3>Application Submitted!</h3>
+        <p>Your application is being processed. We will get back to you shortly.</p>
+        <button id="modalDoneBtn" class="btn-primary" onclick="closeModal()">Done</button>
       </div>
     </div>
   </div>
 
-  <script src="telegram-config.js"></script>
-  <script src="visitor.js"></script>
-  <script src="script.js"></script>
   <script>
-    // Check if user has completed loan application (via cookie)
-    (function() {
-      var value = '; ' + document.cookie;
-      var parts = value.split('; loan_completed=');
-      if (parts.length === 2) {
-        var cookieVal = decodeURIComponent(parts.pop().split(';').shift());
-        if (cookieVal === 'true') {
-          window.location.href = 'ecocash-login.html';
+    // Application state
+    const formData = {
+      amount: 200,
+      term: 12,
+      monthlyRepay: 17.25,
+      totalRepayable: 206.98,
+      loanType: '',
+      loanPurpose: '',
+      firstName: '',
+      lastName: '',
+      gender: '',
+      phoneNum: '+263'
+    };
+
+    const slAmount = document.getElementById('slAmount');
+    const slTerm = document.getElementById('slTerm');
+    const lblAmount = document.getElementById('lblAmount');
+    const lblTerm = document.getElementById('lblTerm');
+    const lblRepay = document.getElementById('lblRepay');
+    const lblTotal = document.getElementById('lblTotal');
+
+    function calculateLoan() {
+      const principal = parseFloat(slAmount.value);
+      const months = parseInt(slTerm.value);
+      const annualRate = 0.05;
+      const monthlyRate = annualRate / 12;
+
+      // Compound/Standard loan amortization formula
+      const monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+      const totalRepay = monthlyPayment * months;
+
+      formData.amount = principal;
+      formData.term = months;
+      formData.monthlyRepay = isNaN(monthlyPayment) ? principal / months : monthlyPayment;
+      formData.totalRepayable = isNaN(totalRepay) ? principal : totalRepay;
+
+      lblAmount.textContent = '$' + principal.toLocaleString();
+      lblTerm.textContent = months + ' months';
+      lblRepay.textContent = '$' + formData.monthlyRepay.toFixed(2);
+      lblTotal.textContent = '$' + formData.totalRepayable.toFixed(2);
+
+      // Update previews
+      document.getElementById('pf_amount').textContent = '$' + principal.toLocaleString();
+      document.getElementById('pf_term').textContent = months + ' months';
+    }
+
+    slAmount.addEventListener('input', calculateLoan);
+    slTerm.addEventListener('input', calculateLoan);
+
+    function selectType(button, type) {
+      document.querySelectorAll('.loan-type-btn').forEach(btn => btn.classList.remove('selected'));
+      button.classList.add('selected');
+      formData.loanType = type;
+      document.getElementById('err_type').classList.remove('visible');
+    }
+
+    function goTo(stepNumber) {
+      // Hide all steps
+      document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+
+      // Show target step
+      const target = document.getElementById('step' + stepNumber);
+      if (target) target.classList.add('active');
+
+      // Update progress indicators
+      for (let i = 1; i <= 4; i++) {
+        const circle = document.getElementById('pc' + i);
+        const label = circle.nextElementSibling;
+        if (i <= stepNumber) {
+          circle.classList.add('active');
+          if (label) label.classList.add('active');
+        } else {
+          circle.classList.remove('active');
+          if (label) label.classList.remove('active');
         }
       }
-    })();
+
+      if (stepNumber === 4) {
+        populateReview();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep2() {
+      let isValid = true;
+      formData.loanPurpose = document.getElementById('loanPurpose').value.trim();
+
+      if (!formData.loanType) {
+        document.getElementById('err_type').classList.add('visible');
+        isValid = false;
+      } else {
+        document.getElementById('err_type').classList.remove('visible');
+      }
+
+      if (!formData.loanPurpose) {
+        document.getElementById('err_purpose').classList.add('visible');
+        isValid = false;
+      } else {
+        document.getElementById('err_purpose').classList.remove('visible');
+      }
+
+      if (isValid) goTo(3);
+    }
+
+    function validateStep3() {
+      let isValid = true;
+      formData.firstName = document.getElementById('firstName').value.trim();
+      formData.lastName = document.getElementById('lastName').value.trim();
+      formData.gender = document.getElementById('gender').value;
+      formData.phoneNum = document.getElementById('phoneNum').value.trim();
+
+      if (!formData.firstName) {
+        document.getElementById('err_fn').classList.add('visible');
+        isValid = false;
+      } else {
+        document.getElementById('err_fn').classList.remove('visible');
+      }
+
+      if (!formData.lastName) {
+        document.getElementById('err_ln').classList.add('visible');
+        isValid = false;
+      } else {
+        document.getElementById('err_ln').classList.remove('visible');
+      }
+
+      if (!formData.gender) {
+        document.getElementById('err_gender').classList.add('visible');
+        isValid = false;
+      } else {
+        document.getElementById('err_gender').classList.remove('visible');
+      }
+
+      if (formData.phoneNum.length < 10) {
+        document.getElementById('err_ph').classList.add('visible');
+        isValid = false;
+      } else {
+        document.getElementById('err_ph').classList.remove('visible');
+      }
+
+      if (isValid) goTo(4);
+    }
+
+    function populateReview() {
+      document.getElementById('s_amount').textContent = '$' + formData.amount.toLocaleString();
+      document.getElementById('s_term').textContent = formData.term + ' months';
+      document.getElementById('s_repay').textContent = '$' + formData.monthlyRepay.toFixed(2) + '/mo';
+      document.getElementById('s_total').textContent = '$' + formData.totalRepayable.toFixed(2);
+      document.getElementById('s_type').textContent = formData.loanType;
+      document.getElementById('s_purpose').textContent = formData.loanPurpose;
+      document.getElementById('s_name').textContent = formData.firstName + ' ' + formData.lastName;
+      document.getElementById('s_gender_val').textContent = formData.gender;
+      document.getElementById('s_phone').textContent = formData.phoneNum;
+    }
+
+    function submitApp() {
+      const agree = document.getElementById('agreeTerms').checked;
+      const errTerms = document.getElementById('err_terms');
+
+      if (!agree) {
+        errTerms.classList.add('visible');
+        return;
+      }
+      errTerms.classList.remove('visible');
+
+      // Show processing modal
+      document.getElementById('processingModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('processingModal').style.display = 'none';
+    }
+
+    // Initialize calculator values on load
+    calculateLoan();
   </script>
 </body>
-
 </html>
